@@ -1,11 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PostService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  private prisma: PrismaService;
+  
+  constructor(prisma: PrismaService) {
+    this.prisma = prisma;
+  }
+
+  async create(dto: CreatePostDto, userReq: any) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userReq.id
+      }
+    })
+
+    return this.prisma.post.create({
+      data: {
+        title: dto.title,
+        text: dto.text,
+
+        authorId: user.id,
+        // author: user
+      }
+    })
   }
 
   findAll() {

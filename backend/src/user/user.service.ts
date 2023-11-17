@@ -30,14 +30,61 @@ export class UserService {
       }})
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async update(id: number, dto: UpdateUserDto) {
+    const user = await this.findOneById(id);
+
+    if(dto.username) {
+      if(this.findOneByUsername(user.username)) {
+        throw new BadRequestException();
+      }
+      if(user.username == dto.username) {
+        throw new BadRequestException();
+      }
+
+      user.username = dto.username;
+    }
+
+    if(dto.password) {
+      if(user.password == dto.password) {
+        throw new BadRequestException();
+      }
+
+      user.password = dto.username;
+    }
+
+    if(dto.bio) {
+      if(user.bio == dto.bio) {
+        throw new BadRequestException()
+      }
+
+      user.bio = dto.bio;
+    }
+
+    if(dto.email) {
+      if(user.email == dto.email) {
+        throw new BadRequestException();
+      }
+
+      user.email = dto.email;
+    }
+
+    if(dto.age) {
+      if(user.age == dto.age) {
+        throw new BadRequestException();
+      }
+
+      user.age == dto.age;
+    }
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} user`;
   }
 
   async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: {
-        id: id,
+        id,
       },
     });
 
@@ -49,18 +96,10 @@ export class UserService {
   async findOneByUsername(username: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        username: username,
+        username,
       },
     });
 
     return user;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }

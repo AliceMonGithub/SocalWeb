@@ -1,4 +1,4 @@
-import { IsArray, IsEmail, IsEmpty, IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, isNotEmpty } from "class-validator";
+import { IsArray, IsEmail, IsEmpty, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, isNotEmpty } from "class-validator";
 import { Post } from "src/post/entities/post.entity";
 
 enum Role {
@@ -16,12 +16,20 @@ export class CreateUserDto {
     password: string;
 
     @IsString()
-    bio: string;
+    @IsEmpty()
+    @IsOptional()
+    bio?: string;
     @IsEmail()
-    email: string;
+    @IsEmpty()
+    @IsOptional()
+    email?: string;
     @IsNumber()
-    age: number;
+    @IsEmpty()
+    @IsOptional()
+    age?: number;
 
     @IsArray()
-    posts: Post[];
+    @IsEmpty()
+    @IsOptional()
+    posts?: Post[];
 }
