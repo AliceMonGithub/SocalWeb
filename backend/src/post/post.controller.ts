@@ -1,25 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('post')
+@UseGuards(AuthGuard)
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    //return this.postService.create(createPostDto);
+  @UsePipes(new ValidationPipe())
+  create(@Body() createPostDto: CreatePostDto, @Request() req) {
+    return this.postService.create(createPostDto, req);
   }
 
   @Get()
-  findAll() {
-    return this.postService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
+  @UsePipes(new ValidationPipe())
+  findAll(@Request() req) {
+    return this.postService.findAllInUser(req);
   }
 
   @Patch(':id')

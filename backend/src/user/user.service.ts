@@ -27,53 +27,98 @@ export class UserService {
         bio: dto.bio,
         email: dto.email,
         age: dto.age,
+
+        posts: [],
       }})
   }
 
-  async update(id: number, dto: UpdateUserDto) {
+  async update(req: any, dto: UpdateUserDto) {
+    const id = req.user.sub;
+
+    console.log(id);
+
     const user = await this.findOneById(id);
 
     if(dto.username) {
-      if(this.findOneByUsername(user.username)) {
+      if(await this.findOneByUsername(dto.username)) {
+        console.log("Another");
+
         throw new BadRequestException();
       }
-      if(user.username == dto.username) {
+      if(user.username == dto.username && dto.username) {
+        console.log("uzhe")
+
         throw new BadRequestException();
       }
 
-      user.username = dto.username;
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          username: dto.username,
+        }
+      })
     }
 
     if(dto.password) {
-      if(user.password == dto.password) {
+      if(user.password == dto.password && dto.password) {
         throw new BadRequestException();
       }
 
-      user.password = dto.username;
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          password: dto.password,
+        }
+      })
     }
 
     if(dto.bio) {
-      if(user.bio == dto.bio) {
+      if(user.bio == dto.bio && dto.bio) {
         throw new BadRequestException()
       }
 
-      user.bio = dto.bio;
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          bio: dto.bio,
+        }
+      })
     }
 
     if(dto.email) {
-      if(user.email == dto.email) {
+      if(user.email == dto.email && dto.email) {
         throw new BadRequestException();
       }
 
-      user.email = dto.email;
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          email: dto.email,
+        }
+      })
     }
 
     if(dto.age) {
-      if(user.age == dto.age) {
+      if(user.age == dto.age && dto.age) {
         throw new BadRequestException();
       }
 
-      user.age == dto.age;
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          age: dto.age,
+        }
+      })
     }
   }
 
@@ -88,17 +133,21 @@ export class UserService {
       },
     });
 
-    if (!user) throw new NotFoundException('User not found');
-
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
     return user;
   }
 
   async findOneByUsername(username: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        username,
+        username: username,
       },
     });
+
+    console.log(user);
 
     return user;
   }

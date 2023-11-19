@@ -21,8 +21,8 @@ export class AuthController {
 
     @Get('login')
     @UsePipes(new ValidationPipe())
-    login(@Body() userDto: CreateUserDto) {
-        return this.authService.login(userDto);
+    login(@Body() userDto: CreateUserDto, @Res({ passthrough: true}) response: Response) {
+        return this.authService.login(userDto, response);
     }
 
     @UseGuards(AuthGuard)

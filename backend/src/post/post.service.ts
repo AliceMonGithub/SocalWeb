@@ -1,40 +1,90 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class PostService {
   private prisma: PrismaService;
+  private userService: UserService;
   
-  constructor(prisma: PrismaService) {
+  constructor(prisma: PrismaService, userService: UserService) {
     this.prisma = prisma;
+    this.userService = userService;
   }
 
-  async create(dto: CreatePostDto, userReq: any) {
+  async create(dto: CreatePostDto, req: any) {
     const user = await this.prisma.user.findUnique({
       where: {
-        id: userReq.id
+        id: req.user.sub
       }
     })
 
-    return this.prisma.post.create({
+    if(!user) {
+      throw new BadRequestException();
+    }
+
+    const instance = await this.prisma.post.create({
       data: {
         title: dto.title,
         text: dto.text,
 
         authorId: user.id,
-        // author: user
+      }
+    });
+
+    await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        posts: {
+          push: instance.id
+        }
       }
     })
+
+    return instance;
   }
 
-  findAll() {
-    return `This action returns all post`;
+  async findAllInUser(req: any) {
+    const user = req.user;
+
+    console.log(user);
+
+    const userdb = await this.userService.findOneById(user.sub);
+
+    if(!userdb) {
+      throw new BadRequestException();
+    }
+
+    console.log(userdb.posts);
+    let posts = [];
+
+    for(const postIndex of userdb.posts) {
+      const post = await this.findOneById(postIndex);
+
+      console.log(post.id);
+
+      posts.push(post);
+    }
+
+    return posts;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOneById(id: number) {
+    const post = await this.prisma.post.findUnique({
+      where: {
+        id,
+      }
+    })
+
+    if(!post) {
+      throw new NotFoundException();
+    }
+
+    return post;
   }
 
   update(id: number, updatePostDto: UpdatePostDto) {

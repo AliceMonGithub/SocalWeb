@@ -16,20 +16,16 @@ export class CreateUserDto {
     password: string;
 
     @IsString()
-    @IsEmpty()
     @IsOptional()
     bio?: string;
     @IsEmail()
-    @IsEmpty()
     @IsOptional()
     email?: string;
     @IsNumber()
-    @IsEmpty()
     @IsOptional()
     age?: number;
 
     @IsArray()
-    @IsEmpty()
-    @IsOptional()
+    @IsNotEmpty()
     posts?: Post[];
 }

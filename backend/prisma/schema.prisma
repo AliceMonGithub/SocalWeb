@@ -21,7 +21,7 @@ model User {
   email String?
   age Int?
 
-  posts Post[]
+  posts Int[]
 }
 
 model Post {
@@ -33,7 +33,6 @@ model Post {
   title String?
   text String
   
-  author User @relation(fields: [authorId], references: [id])
   authorId Int
 }
 

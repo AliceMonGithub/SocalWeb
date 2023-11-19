@@ -1,14 +1,14 @@
-import { IsNumber, IsString } from "class-validator";
-import { User } from "src/user/entities/user.entity";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePostDto {
     @IsString()
+    @IsOptional()
     title: string;
     @IsString()
+    @IsNotEmpty()
     text: string;
-
     
     @IsNumber()
+    @IsNotEmpty()
     authorId: Number;
-    author: User;
 }

@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { Response, response } from 'express';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 
@@ -27,13 +27,20 @@ export class AuthService {
     };
   }
  
-  async login(userDto: CreateUserDto) {
+  async login(userDto: CreateUserDto, response: Response) {
     const user = await this.userService.findOneByUsername(userDto.username);
 
+    if(!user) {
+      throw new BadRequestException();
+    }
+
     const payload = { sub: user.id, username: user.username };
+    const sign = await this.jwtService.signAsync(payload);
+
+    response.cookie('token', sign);
 
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: sign,
     };
   }
 
@@ -41,7 +48,7 @@ export class AuthService {
     const user = req.user;
 
     if(!user) {
-      throw new BadRequestException();
+      throw new UnauthorizedException();
     }
 
     console.log(user);
